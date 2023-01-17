@@ -4,7 +4,7 @@ from functools import partial
 from typing import List, Tuple
 
 import hivemind
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS, cross_origin
 
 from multiaddr import Multiaddr
@@ -37,10 +37,6 @@ class ServerInfo:
     friendly_peer_id: str = None
     throughput: float = None
     blocks: List[Tuple[int, ServerState]] = field(default_factory=list)
-
-@app.route("/")
-def main_page():
-    return app.send_static_file("index.html")
 
 @app.route("/health.json")
 @cross_origin()
@@ -213,6 +209,18 @@ def health():
         reachability_issues=reachability_issues,
     )
 
+@app.route('/')
+@app.route('/<path:path>')
+def send_static(path="index.html"):
+    return send_from_directory('health-frontend/build', path)
+
+@app.route('/static/css/<path:path>')
+def send_static2(path):
+    return send_from_directory('health-frontend/build/static/css', path)
+
+@app.route('/static/js/<path:path>')
+def send_static3(path):
+    return send_from_directory('health-frontend/build/static/js', path)
 
 def get_state_html(state_name: str):
     state_name = state_name.lower()

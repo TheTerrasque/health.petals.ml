@@ -5,13 +5,23 @@ import { Bootstrap } from './components/bootstrap';
 import { Model } from './components/model';
 
 function App() {
-  // get health from backend via ajax:
-
+  const apiUrl = process.env.REACT_APP_API_URL_DEVELOPMENT || '/health.json';
   const [health, setHealth] = useState<IHealth | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
   useEffect(() => {
-    fetch('http://localhost:5990/health.json')
+    setLoading(true);
+    setError(null); 
+
+    fetch(apiUrl)
       .then(response => response.json())
-      .then(data => setHealth(data));
+      .then(data => { setHealth(data); setLoading(false); })
+      .catch(error => {
+        console.error(error)
+        setError(error)
+        alert("Error fetching health data from server. Please check the server logs.\n\n" + error)
+      });
   }, []);
 
   return (
@@ -20,7 +30,8 @@ function App() {
         <a target="_blank" href="https://petals.ml"><img src="https://petals.ml/logo.svg" height="50" className="rot-image" /></a>
         <h1>Petals server status</h1>
       </div>
-      {!health && <div>Loading...</div>}
+      {loading && <div>Loading...</div>}
+      {error && <div>Error getting status: {error}</div>}
       <div className='row gy-5'>
         {health && <Bootstrap servers={health.bootstrap_servers} />}
       </div>

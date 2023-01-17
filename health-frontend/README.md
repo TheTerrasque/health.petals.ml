@@ -8,6 +8,8 @@ In the project directory, you can run:
 
 ### `npm start`
 
+`npx cross-env REACT_APP_API_URL_DEVELOPMENT="http://127.0.0.1:5990/health.json" npm start`
+
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
