@@ -5,6 +5,8 @@ from typing import List, Tuple
 
 import hivemind
 from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS, cross_origin
+
 from multiaddr import Multiaddr
 from petals.constants import PUBLIC_INITIAL_PEERS
 from petals.data_structures import ServerState
@@ -18,7 +20,6 @@ dht = hivemind.DHT(
 )
 app = Flask(__name__)
 
-
 @dataclass
 class ModelInfo:
     name: str
@@ -31,18 +32,98 @@ MODELS = [
     ModelInfo("bigscience/bloomz-petals", "bigscience/bloomz", 70),
 ]
 
-
 @dataclass
 class ServerInfo:
     friendly_peer_id: str = None
     throughput: float = None
     blocks: List[Tuple[int, ServerState]] = field(default_factory=list)
 
-
 @app.route("/")
 def main_page():
     return app.send_static_file("index.html")
 
+@app.route("/health.json")
+@cross_origin()
+def health_json():
+    bootstrap_peer_ids = []
+    for addr in PUBLIC_INITIAL_PEERS:
+        peer_id = hivemind.PeerID.from_base58(Multiaddr(addr)["p2p"])
+        if peer_id not in bootstrap_peer_ids:
+            bootstrap_peer_ids.append(peer_id)
+
+    rpc_infos = dht.run_coroutine(partial(check_reachability_parallel, bootstrap_peer_ids))
+
+    model_reports = []
+    for model in MODELS:
+        module_infos = get_remote_module_infos(
+            dht,
+            [f"{model.name}.{i}" for i in range(model.n_blocks)],
+            float("inf"),
+        )
+        servers = defaultdict(ServerInfo)
+        n_found_blocks = 0
+        for block_idx, info in enumerate(module_infos):
+            if info is None:
+                continue
+
+            found = False
+            for peer_id, server in info.servers.items():
+                servers[peer_id].throughput = server.throughput
+                servers[peer_id].blocks.append((block_idx, server.state))
+                if server.state == ServerState.ONLINE:
+                    found = True
+            n_found_blocks += found
+        all_blocks_found = n_found_blocks == model.n_blocks
+        rpc_infos.update(dht.run_coroutine(partial(check_reachability_parallel, list(servers.keys()), fetch_info=True)))
+        all_bootstrap_reachable = all(rpc_infos[peer_id]["ok"] for peer_id in bootstrap_peer_ids)
+        model_state = "healthy" if all_blocks_found and all_bootstrap_reachable else "broken"
+        bootstrap_states = [{"peer": str(peer_id), "online": rpc_infos[peer_id]["ok"]} for peer_id in bootstrap_peer_ids]
+        
+        server_rows = []
+        for peer_id, server_info in sorted(servers.items()):
+            block_indices = [block_idx for block_idx, state in server_info.blocks if state != ServerState.OFFLINE]
+            block_indices = [min(block_indices), max(block_indices) + 1] if block_indices else []
+
+            block_map = []
+            for block_idx, state in server_info.blocks:
+                state_name = state.name
+                state_val = state.value
+                if state == ServerState.ONLINE and not rpc_infos[peer_id]["ok"]:
+                    state_name = "UNREACHABLE"
+                    state_val = 3
+                block_map.append({"block_index": block_idx, "state_text": state_name, "state": state_val})
+
+            row = rpc_infos[peer_id]
+            row.update(
+                {
+                    "short_peer_id": "..." + str(peer_id)[-12:],
+                    "peer_id": str(peer_id),
+                    "throughput": server_info.throughput,
+                    "block_indices": block_indices,
+                    "blocks": block_map,
+                }
+            )
+            server_rows.append(row)
+
+        reachability_issues = [
+            {"peer_id": str(peer_id), "err": info["error"]}
+            for peer_id, info in sorted(rpc_infos.items())
+            if not info["ok"]
+            and (peer_id not in servers or any(state == ServerState.ONLINE for _, state in servers[peer_id].blocks))
+        ]
+        model_reports.append({
+            "name": model.name,
+            "original_name": model.original_name,
+            "n_blocks": model.n_blocks,
+            "state": model_state,
+            "servers": server_rows
+        })
+    data = {
+        "models": model_reports,
+        "bootstrap_servers": bootstrap_states,
+        "reachability_issues": reachability_issues
+    }
+    return jsonify(data)
 
 @app.route("/health")
 def health():
@@ -153,3 +234,6 @@ def api_v1_is_reachable(peer_id):
         message=rpc_info.get("error"),
         your_ip=request.remote_addr,
     )
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5990)

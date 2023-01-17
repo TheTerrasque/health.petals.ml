@@ -1,0 +1,19 @@
+.status {
+    padding: .2rem;
+}
+
+.status-online {
+    color: #4caf50;
+}
+
+.status-offline {
+    color: #f44336;
+}
+
+.status-loading {
+    color: #ff9800;
+}
+
+.status-unreachable {
+    color: #9e9e9e;
+}
