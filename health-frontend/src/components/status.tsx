@@ -8,6 +8,13 @@ import { faHourglass } from '@fortawesome/free-solid-svg-icons'
 import { faPlugCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import './status.css';
 
+const STATE = {
+    [EState.Online]: { name: "Online", description: "Up and running" },
+    [EState.Loading]: { name: "Loading", description: "Loading blocks, joining soon" },
+    [EState.Offline]: { name: "Offline", description: "Disconnected a few minutes ago" },
+    [EState.Unreachable]: { name: "Unreachable", description: "Unreachable from the Internet" },
+}
+
 interface IProps {
     state: EState,
     text?: string
@@ -33,10 +40,9 @@ export function OnlineState(props: IProps) {
     }
 
     return (
-        <span className={`status status-${state}`}
-            title={props.text}
+        <span className={`status status-${state}`} title={props.text}
         >
-            {icon}
+            {icon}            
         </span>
     );
 }
