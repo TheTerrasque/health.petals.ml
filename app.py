@@ -1,11 +1,14 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
+from datetime import datetime
 from functools import partial
 from typing import List, Tuple
 
 import hivemind
+
 from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS, cross_origin
+from flask_caching import Cache
 
 from multiaddr import Multiaddr
 from petals.constants import PUBLIC_INITIAL_PEERS
@@ -19,6 +22,7 @@ dht = hivemind.DHT(
     initial_peers=PUBLIC_INITIAL_PEERS, client_mode=True, num_workers=32, use_auto_relay=True, start=True
 )
 app = Flask(__name__)
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 @dataclass
 class ModelInfo:
@@ -38,6 +42,7 @@ class ServerInfo:
     throughput: float = None
     blocks: List[Tuple[int, ServerState]] = field(default_factory=list)
 
+@cache.cached(timeout=30)
 @app.route("/health.json")
 @cross_origin()
 def health_json():
@@ -117,7 +122,8 @@ def health_json():
     data = {
         "models": model_reports,
         "bootstrap_servers": bootstrap_states,
-        "reachability_issues": reachability_issues
+        "reachability_issues": reachability_issues,
+        "updated_at": datetime.now().isoformat(),
     }
     return jsonify(data)
 

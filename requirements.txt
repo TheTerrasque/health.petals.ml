@@ -1,4 +1,5 @@
 git+https://github.com/bigscience-workshop/petals
 Flask
 flask-cors
+Flask-Caching
 gunicorn

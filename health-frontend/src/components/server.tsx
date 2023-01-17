@@ -11,7 +11,7 @@ export function Server(props: { server: IServer, model: IModel }) {
             <td>{props.server.throughput.toFixed(1)}</td>
             <td>{props.server.cache_tokens_available}</td>
             <td>{props.server.dht_client_mode ? "Client" : "Full"}</td>
-            <td>{props.server.block_indices && props.server.block_indices[0] + ":" + props.server.block_indices[1]}</td>
+            <td>{props.server.block_indices && props.server.block_indices.length == 2 && props.server.block_indices[0] + ":" + props.server.block_indices[1]}</td>
             {  blocks }
         </tr>
     );

@@ -39,4 +39,5 @@ export interface IModel {
 export interface IHealth { 
     bootstrap_servers: IBootstrapServer[],
     models: IModel[],
+    updated_at: string
 }

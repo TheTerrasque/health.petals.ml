@@ -5,7 +5,7 @@ import { Server } from './server';
 export function Model(props: { model: IModel }) {
     return (
         <div className='model'>
-            <div>Model {props.model.name} [{props.model.state}]</div>
+            <div>Model {props.model.name} [<span className={`model-state model-state-${props.model.state}`}>{props.model.state}</span>]</div>
             <div className='model-servers'>
             <table className='table-servers'>
                 <thead className='table-light'>

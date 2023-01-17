@@ -40,7 +40,7 @@ export function OnlineState(props: IProps) {
     }
 
     return (
-        <span className={`status status-${state}`} title={props.text}
+        <span className={`status status-${state}`} title={props.text + "\n" + STATE[props.state].name + "\n\n " + STATE[props.state].description}
         >
             {icon}            
         </span>

@@ -1,0 +1,4 @@
+health-frontend/node_modules/
+health-frontend/build/
+.git
+__pycache__
