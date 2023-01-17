@@ -42,7 +42,7 @@ function App() {
           <h1>Petals <span className='hmtext'>Health Monitor</span></h1>
         </header>
       </div>
-      {loading && <div className="loading">Loading...</div>}
+      {loading && <div className="loading">Fetching fresh data...</div>}
       {!loading && health && <div className="notLoading">
           Data updated at {moment(health.updated_at).format('YYYY-MM-DD HH:mm:ss')}
           <FontAwesomeIcon icon={faSync} onClick={loadHealth} className="reloadButton" />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { IModel } from '../interfaces/IHealth';
 import { Server } from './server';
+import './model.css';
 
 export function Model(props: { model: IModel }) {
     return (
@@ -16,7 +17,7 @@ export function Model(props: { model: IModel }) {
                         <th>Cache tokens</th>
                         <th>DHT mode</th>
                         <th>Blocks</th>
-                            {Array.from({ length: props.model.n_blocks }, (_, i) => i + 1).map((index) => <th key={index}>{index}</th>)}
+                            {Array.from({ length: props.model.n_blocks }, (_, i) => i + 1).map((index) => <th className='blockHeader' key={index}>{index}</th>)}
                     </tr>
                 </thead>
                 <tbody>

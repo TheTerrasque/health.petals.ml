@@ -1,7 +1,6 @@
 import React from 'react';
 import { IBlock, IModel } from '../interfaces/IHealth';
 import { OnlineState } from './status';
-import './blocks.css';
 
 export function Blocks(blocks: IBlock[], model: IModel ) {
     const blockMap = blocks.map(block => Object.assign({}, {[block.block_index]: block}))

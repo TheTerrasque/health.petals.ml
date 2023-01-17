@@ -1,0 +1,43 @@
+.model-state-healthy {
+    color: #25bd25;
+}
+
+.model-state-broken {
+    color: #bd2525;
+}
+
+.table-servers {
+    border-spacing: 1px;
+    padding: 2px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    font-family: 'Courier', monospace;
+    font-size: 9pt;
+    border: 1px solid rgb(188, 188, 188);
+}
+
+.table-servers th {
+    padding: 1px 3px;
+    background-color: #cacaca;
+    border-bottom: 1px solid rgb(201, 201, 201);
+    border-left: 1px solid rgb(170, 170, 170);
+}
+
+.table-servers td {
+    padding: 1px 2px;
+    background-color: #f0f0f0;
+    border-left: 1px solid #ddd;
+}
+.table-servers tr:nth-child(even) td {
+    background-color: #ffffff;
+}
+
+.block-status {
+    font-size: 90%;
+}
+
+.blockHeader {
+    font-size: 70%;
+    font-weight: bold;
+}

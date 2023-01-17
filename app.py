@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from functools import partial
 from typing import List, Tuple
+import os
 
 import hivemind
 
@@ -22,7 +23,10 @@ dht = hivemind.DHT(
     initial_peers=PUBLIC_INITIAL_PEERS, client_mode=True, num_workers=32, use_auto_relay=True, start=True
 )
 app = Flask(__name__)
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+if os.environ.get("RUN_ENV") == "prod":
+    cache = Cache(app, config={'CACHE_TYPE': 'FileSystemCache', "CACHE_DIR": "/tmp/petals-cache"})
+else:
+    cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
 
 @dataclass
 class ModelInfo:
@@ -42,9 +46,9 @@ class ServerInfo:
     throughput: float = None
     blocks: List[Tuple[int, ServerState]] = field(default_factory=list)
 
-@cache.cached(timeout=30)
 @app.route("/health.json")
 @cross_origin()
+@cache.cached(timeout=15)
 def health_json():
     bootstrap_peer_ids = []
     for addr in PUBLIC_INITIAL_PEERS:
@@ -74,6 +78,7 @@ def health_json():
                 if server.state == ServerState.ONLINE:
                     found = True
             n_found_blocks += found
+
         all_blocks_found = n_found_blocks == model.n_blocks
         rpc_infos.update(dht.run_coroutine(partial(check_reachability_parallel, list(servers.keys()), fetch_info=True)))
         all_bootstrap_reachable = all(rpc_infos[peer_id]["ok"] for peer_id in bootstrap_peer_ids)
