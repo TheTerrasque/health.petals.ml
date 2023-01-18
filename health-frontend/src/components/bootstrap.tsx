@@ -5,7 +5,7 @@ import { OnlineState } from './status';
 export function Bootstrap(props: { servers: IBootstrapServer[] }) {
     return (
         <div className='bootstrap-server-status-wrapper'>
-            <span>Bootstrap servers: </span>
+            <span>DHT Bootstrap servers: </span>
 
             <span className='bootstrap-server-status'>
                 {props.servers.map((server) => 

@@ -63,6 +63,12 @@ header h1 {
   }
 }
 
-.containery {
-  padding-left: 1em;
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 10vh;
+  padding-top: 2em;
+  text-align: center;
 }

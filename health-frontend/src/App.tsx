@@ -44,17 +44,19 @@ function App() {
       </div>
       {loading && <div className="loading">Fetching fresh data...</div>}
       {!loading && health && <div className="notLoading">
-          Data updated at {moment(health.updated_at).format('YYYY-MM-DD HH:mm:ss')}
-          <FontAwesomeIcon icon={faSync} onClick={loadHealth} className="reloadButton" />
-        </div>
+        Data updated at {moment(health.updated_at).format('YYYY-MM-DD HH:mm:ss')}
+        <FontAwesomeIcon icon={faSync} onClick={loadHealth} className="reloadButton" />
+      </div>
       }
       {error && <div className="error">Error getting status: <span className='error-text'>{error}</span></div>}
       {!health && <div className='no-data'>No data to display yet</div>}
-      <div className='section-bootstrap'>
-        {health && <Bootstrap servers={health.bootstrap_servers} />}
-      </div>
-      <div className='section-models'>
-        {health && health.models.map((model) => <Model model={model} key={model.name} />)}
+      <div className='main'>
+        <div className='section-bootstrap'>
+          {health && <Bootstrap servers={health.bootstrap_servers} />}
+        </div>
+        <div className='section-models'>
+          {health && health.models.map((model) => <Model model={model} key={model.name} />)}
+        </div>
       </div>
     </div>
   );
