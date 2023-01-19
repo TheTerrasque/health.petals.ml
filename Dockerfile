@@ -6,12 +6,15 @@ RUN npm install
 COPY health-frontend/ /app/
 RUN npm run build
 
-FROM python:3.9-slim-buster
+FROM python:3.9-slim
+
+ENV PYTHONUNBUFFERED=1 
+ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 COPY requirements.txt /app/
 RUN apt update && apt install -y git && apt clean
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py p2p_utils.py /app/
 COPY --from=builder /app/build /app/health-frontend/build
